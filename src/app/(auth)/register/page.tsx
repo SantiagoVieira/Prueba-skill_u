@@ -9,20 +9,28 @@ import { supabase } from "@/lib/supabase";
 export default function RegisterPage() {
   const router = useRouter();
 
-  const [firstName,    setFirstName]    = useState("");
-  const [lastName,     setLastName]     = useState("");
-  const [email,        setEmail]        = useState("");
-  const [program,      setProgram]      = useState("");
-  const [password,     setPassword]     = useState("");
-  const [confirmPass,  setConfirmPass]  = useState("");
-  const [showPass,     setShowPass]     = useState(false);
-  const [showConfirm,  setShowConfirm]  = useState(false);
-  const [error,        setError]        = useState("");
-  const [loading,      setLoading]      = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [program, setProgram] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    // Validar dominio universitario
+    const ALLOWED_DOMAINS = ["@soyudemedellin.edu.co", "@udemedellin.edu.co"];
+    const emailLower = email.toLowerCase();
+    if (!ALLOWED_DOMAINS.some(d => emailLower.endsWith(d))) {
+      setError("Solo se permiten correos institucionales @soyudemedellin.edu.co o @udemedellin.edu.co");
+      return;
+    }
 
     if (password !== confirmPass) {
       setError("Las contraseñas no coinciden.");
@@ -37,7 +45,7 @@ export default function RegisterPage() {
       options: {
         data: {
           first_name: firstName,
-          last_name:  lastName,
+          last_name: lastName,
           program,
         },
       },
@@ -49,7 +57,7 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/materiales");
+    router.push("/login");
   }
 
   return (
@@ -63,9 +71,9 @@ export default function RegisterPage() {
           </>
         }
         stats={[
-          { value: "Gratis", label: "Siempre"     },
-          { value: "2 min",  label: "Registro"    },
-          { value: "100%",   label: "Estudiantes" },
+          { value: "Gratis", label: "Siempre" },
+          { value: "2 min", label: "Registro" },
+          { value: "100%", label: "Estudiantes" },
         ]}
       />
 

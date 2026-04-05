@@ -12,13 +12,33 @@ interface Props {
 export function PublishMetaModal({ onClose, onSaved }: Props) {
   const [title,   setTitle]   = useState("");
   const [desc,    setDesc]    = useState("");
-  const [subject, setSubject] = useState<string>(SUBJECTS[0]); // ← tipo explícito
+  const [subject, setSubject] = useState<string>(SUBJECTS[0]);
   const [price,   setPrice]   = useState("0");
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
 
+  function handlePriceChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value;
+    // Solo dígitos, sin negativos ni letras
+    if (raw === "" || /^\d+$/.test(raw)) {
+      setPrice(raw);
+    }
+  }
+
+  function handlePriceBlur() {
+    // Si queda vacío al salir del campo, vuelve a 0
+    if (price === "") setPrice("0");
+  }
+
   async function handleSave() {
     if (!title.trim()) { setError("El título es obligatorio"); return; }
+
+    const parsedPrice = parseInt(price, 10);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      setError("El precio debe ser un número positivo");
+      return;
+    }
+
     setLoading(true);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
@@ -30,7 +50,7 @@ export function PublishMetaModal({ onClose, onSaved }: Props) {
         title:       title.trim(),
         description: desc.trim(),
         subject,
-        price:       parseFloat(price) || 0,
+        price:       parsedPrice,
         is_visible:  false,
       })
       .select("id")
@@ -77,7 +97,7 @@ export function PublishMetaModal({ onClose, onSaved }: Props) {
                 <select
                   className="field-select"
                   value={subject}
-                  onChange={(e) => setSubject(e.target.value)} 
+                  onChange={(e) => setSubject(e.target.value)}
                 >
                   {SUBJECTS.map((s) => (
                     <option key={s} value={s}>{s}</option>
@@ -85,14 +105,23 @@ export function PublishMetaModal({ onClose, onSaved }: Props) {
                 </select>
               </div>
             </div>
+
             <div className="field-group">
-              <label className="field-label">Precio (COP)</label>
+              <label className="field-label">
+                Precio (COP)
+                {price !== "0" && price !== "" && (
+                  <span style={{ color: "var(--orange)", fontWeight: 400, marginLeft: 6 }}>
+                    ${parseInt(price || "0").toLocaleString("es-CO")}
+                  </span>
+                )}
+              </label>
               <input
                 className="field-input"
-                type="number"
-                min={0}
+                type="text"
+                inputMode="numeric"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={handlePriceChange}
+                onBlur={handlePriceBlur}
                 placeholder="0 = gratis"
               />
             </div>

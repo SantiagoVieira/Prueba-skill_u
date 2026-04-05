@@ -14,13 +14,31 @@ interface Props {
 export function EditMaterialModal({ material: m, onClose, onSaved }: Props) {
   const [title,   setTitle]   = useState(m.title);
   const [desc,    setDesc]    = useState(m.description ?? "");
-  const [subject, setSubject] = useState(m.subject ?? SUBJECTS[0]);
+  const [subject, setSubject] = useState<string>(m.subject ?? SUBJECTS[0]);
   const [price,   setPrice]   = useState(String(m.price ?? 0));
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
 
+  function handlePriceChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value;
+    if (raw === "" || /^\d+$/.test(raw)) {
+      setPrice(raw);
+    }
+  }
+
+  function handlePriceBlur() {
+    if (price === "") setPrice("0");
+  }
+
   async function handleSave() {
     if (!title.trim()) { setError("El título es obligatorio"); return; }
+
+    const parsedPrice = parseInt(price, 10);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      setError("El precio debe ser un número positivo");
+      return;
+    }
+
     setLoading(true);
 
     const { error: err } = await supabase
@@ -29,7 +47,7 @@ export function EditMaterialModal({ material: m, onClose, onSaved }: Props) {
         title:       title.trim(),
         description: desc.trim(),
         subject,
-        price:       parseFloat(price) || 0,
+        price:       parsedPrice,
       })
       .eq("id", m.id);
 
@@ -48,26 +66,57 @@ export function EditMaterialModal({ material: m, onClose, onSaved }: Props) {
         <div className="modal-body">
           <div className="field-group">
             <label className="field-label">Título *</label>
-            <input className="field-input" value={title} onChange={e => setTitle(e.target.value)} />
+            <input
+              className="field-input"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+            />
           </div>
 
           <div className="field-group">
             <label className="field-label">Descripción</label>
-            <textarea className="field-textarea" rows={3} value={desc} onChange={e => setDesc(e.target.value)} />
+            <textarea
+              className="field-textarea"
+              rows={3}
+              value={desc}
+              onChange={e => setDesc(e.target.value)}
+            />
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div className="field-group">
               <label className="field-label">Materia</label>
               <div className="select-wrap">
-                <select className="field-select" value={subject} onChange={e => setSubject(e.target.value)}>
-                  {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+                <select
+                  className="field-select"
+                  value={subject}
+                  onChange={e => setSubject(e.target.value)}
+                >
+                  {SUBJECTS.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
                 </select>
               </div>
             </div>
+
             <div className="field-group">
-              <label className="field-label">Precio (COP)</label>
-              <input className="field-input" type="number" min={0} value={price} onChange={e => setPrice(e.target.value)} />
+              <label className="field-label">
+                Precio (COP)
+                {price !== "0" && price !== "" && (
+                  <span style={{ color: "var(--orange)", fontWeight: 400, marginLeft: 6 }}>
+                    ${parseInt(price || "0").toLocaleString("es-CO")}
+                  </span>
+                )}
+              </label>
+              <input
+                className="field-input"
+                type="text"
+                inputMode="numeric"
+                value={price}
+                onChange={handlePriceChange}
+                onBlur={handlePriceBlur}
+                placeholder="0 = gratis"
+              />
             </div>
           </div>
 
