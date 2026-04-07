@@ -71,9 +71,9 @@ export default function RegisterPage() {
           </>
         }
         stats={[
-          { value: "Gratis", label: "Siempre" },
-          { value: "2 min", label: "Registro" },
-          { value: "100%", label: "Estudiantes" },
+          { value: "Gratis", label: "Siempre"     },
+          { value: "2 min",  label: "Registro"    },
+          { value: "100%",   label: "Comunidad Universitaria" },
         ]}
       />
 
