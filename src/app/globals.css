@@ -962,3 +962,8 @@ body {
 .password-eye:hover {
   color: var(--gray-600);
 }
+
+@keyframes progress-bar {
+  from { width: 0%; }
+  to   { width: 100%; }
+}

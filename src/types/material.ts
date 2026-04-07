@@ -18,6 +18,7 @@ export interface Material {
 export const SUBJECTS = [
   "Cálculo Diferencial",
   "Cálculo Integral",
+  "Calculo de Varias Variables",
   "Álgebra Lineal",
   "Ecuaciones Diferenciales",
   "Física I",

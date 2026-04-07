@@ -1,19 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthLeft } from "@/components/auth/AuthLeft";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const router       = useRouter();
+  const searchParams = useSearchParams();
 
-  const [email,       setEmail]       = useState("");
-  const [password,    setPassword]    = useState("");
-  const [showPass,    setShowPass]    = useState(false);
-  const [error,       setError]       = useState("");
-  const [loading,     setLoading]     = useState(false);
+  const [email,      setEmail]      = useState("");
+  const [password,   setPassword]   = useState("");
+  const [showPass,   setShowPass]   = useState(false);
+  const [error,      setError]      = useState("");
+  const [loading,    setLoading]    = useState(false);
+  const [registered, setRegistered] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("registered") === "1") {
+      setRegistered(true);
+      // Limpiar el parámetro de la URL sin recargar
+      window.history.replaceState({}, "", "/login");
+    }
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,13 +48,7 @@ export default function LoginPage() {
   return (
     <div className="auth-wrapper">
       <AuthLeft
-        headline={
-          <>
-            Tu marketplace<br />
-            <em>universitario</em><br />
-            favorito.
-          </>
-        }
+        headline={<>Tu marketplace<br /><em>universitario</em><br />favorito.</>}
         stats={[
           { value: "12K+", label: "Estudiantes"   },
           { value: "340+", label: "Universidades" },
@@ -56,44 +60,45 @@ export default function LoginPage() {
         <h1 className="auth-form-title">Bienvenido de vuelta</h1>
         <p className="auth-form-sub">Ingresa tu cuenta para continuar</p>
 
+        {/* Banner de registro exitoso */}
+        {registered && (
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10,
+            background: "#f0fdf4", border: "1px solid #bbf7d0",
+            borderRadius: 8, padding: "10px 14px", marginBottom: 16,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <p style={{ fontSize: 12, color: "#15803d", margin: 0, lineHeight: 1.5 }}>
+              <strong>¡Cuenta creada exitosamente!</strong><br />
+              Ahora puedes iniciar sesión.
+            </p>
+          </div>
+        )}
+
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="field-group">
-            <label className="field-label" htmlFor="email">
-              Correo electrónico
-            </label>
+            <label className="field-label" htmlFor="email">Correo electrónico</label>
             <input
-              id="email"
-              className="field-input"
-              type="email"
-              placeholder="tu@universidad.edu.co"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="email" className="field-input" type="email"
+              placeholder="tu@universidad.edu.co" autoComplete="email" required
+              value={email} onChange={e => setEmail(e.target.value)}
             />
           </div>
 
           <div className="field-group">
-            <label className="field-label" htmlFor="password">
-              Contraseña
-            </label>
+            <label className="field-label" htmlFor="password">Contraseña</label>
             <div className="password-wrap">
               <input
-                id="password"
-                className="field-input"
+                id="password" className="field-input"
                 type={showPass ? "text" : "password"}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••" autoComplete="current-password" required
+                value={password} onChange={e => setPassword(e.target.value)}
               />
-              <button
-                type="button"
-                className="password-eye"
-                onClick={() => setShowPass(v => !v)}
-                tabIndex={-1}
-              >
+              <button type="button" className="password-eye"
+                onClick={() => setShowPass(v => !v)} tabIndex={-1}>
                 {showPass ? <EyeOffIcon /> : <EyeIcon />}
               </button>
             </div>
@@ -101,17 +106,13 @@ export default function LoginPage() {
 
           {error && <p className="auth-error">{error}</p>}
 
-          <Link href="#" className="auth-forgot">
-            ¿Olvidaste tu contraseña?
-          </Link>
+          <Link href="#" className="auth-forgot">¿Olvidaste tu contraseña?</Link>
 
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? "Ingresando…" : "Iniciar sesión"}
           </button>
 
-          <div className="divider">
-            <span>o continúa con</span>
-          </div>
+          <div className="divider"><span>o continúa con</span></div>
 
           <button type="button" className="auth-google-btn">
             <GoogleIcon />

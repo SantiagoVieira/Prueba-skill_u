@@ -9,22 +9,22 @@ import { supabase } from "@/lib/supabase";
 export default function RegisterPage() {
   const router = useRouter();
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [program, setProgram] = useState("");
-  const [password, setPassword] = useState("");
+  const [firstName,   setFirstName]   = useState("");
+  const [lastName,    setLastName]    = useState("");
+  const [email,       setEmail]       = useState("");
+  const [program,     setProgram]     = useState("");
+  const [password,    setPassword]    = useState("");
   const [confirmPass, setConfirmPass] = useState("");
-  const [showPass, setShowPass] = useState(false);
+  const [showPass,    setShowPass]    = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [error,       setError]       = useState("");
+  const [success,     setSuccess]     = useState(false);
+  const [loading,     setLoading]     = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
-    // Validar dominio universitario
     const ALLOWED_DOMAINS = ["@soyudemedellin.edu.co", "@udemedellin.edu.co"];
     const emailLower = email.toLowerCase();
     if (!ALLOWED_DOMAINS.some(d => emailLower.endsWith(d))) {
@@ -43,11 +43,7 @@ export default function RegisterPage() {
       email,
       password,
       options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          program,
-        },
+        data: { first_name: firstName, last_name: lastName, program },
       },
     });
 
@@ -57,23 +53,70 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/login");
+    // Mostrar mensaje de éxito y redirigir después de 2.5s
+    setSuccess(true);
+    setTimeout(() => router.push("/login?registered=1"), 2500);
+  }
+
+  // ── Pantalla de éxito ──────────────────────────────────
+  if (success) {
+    return (
+      <div className="auth-wrapper">
+        <AuthLeft
+          headline={<>Únete a la<br />comunidad<br /><em>estudiantil.</em></>}
+          stats={[
+            { value: "Gratis", label: "Siempre"     },
+            { value: "2 min",  label: "Registro"    },
+            { value: "100%",   label: "Comunidad Universitaria" },
+          ]}
+        />
+        <div className="auth-right" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ textAlign: "center", maxWidth: 360 }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: "50%",
+              background: "#dcfce7",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              margin: "0 auto 20px",
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h2 style={{
+              fontFamily: "Syne, sans-serif", fontSize: 22,
+              fontWeight: 700, color: "var(--gray-900)", marginBottom: 10,
+            }}>
+              ¡Cuenta creada!
+            </h2>
+            <p style={{ fontSize: 13, color: "var(--gray-500)", lineHeight: 1.65, marginBottom: 24 }}>
+              Tu cuenta fue creada exitosamente.<br />
+              Te redirigimos al inicio de sesión…
+            </p>
+            <div style={{
+              height: 4, borderRadius: 2,
+              background: "var(--gray-200)", overflow: "hidden",
+            }}>
+              <div style={{
+                height: "100%", background: "var(--orange)",
+                borderRadius: 2,
+                animation: "progress-bar 2.5s linear forwards",
+              }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="auth-wrapper">
       <AuthLeft
-        headline={
-          <>
-            Únete a la<br />
-            comunidad<br />
-            <em>estudiantil.</em>
-          </>
-        }
+        headline={<>Únete a la<br />comunidad<br /><em>estudiantil.</em></>}
         stats={[
-          { value: "Gratis", label: "Siempre"     },
-          { value: "2 min",  label: "Registro"    },
-          { value: "100%",   label: "Comunidad Universitaria" },
+          { value: "Gratis", label: "Siempre" },
+          { value: "2 min", label: "Registro" },
+          { value: "100%", label: "Estudiantes" },
         ]}
       />
 
@@ -85,110 +128,56 @@ export default function RegisterPage() {
           <div className="auth-form-row">
             <div className="field-group">
               <label className="field-label" htmlFor="firstName">Nombre</label>
-              <input
-                id="firstName"
-                className="field-input"
-                type="text"
-                placeholder="Juan"
-                autoComplete="given-name"
-                required
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
+              <input id="firstName" className="field-input" type="text"
+                placeholder="Juan" autoComplete="given-name" required
+                value={firstName} onChange={e => setFirstName(e.target.value)} />
             </div>
             <div className="field-group">
               <label className="field-label" htmlFor="lastName">Apellido</label>
-              <input
-                id="lastName"
-                className="field-input"
-                type="text"
-                placeholder="García"
-                autoComplete="family-name"
-                required
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
+              <input id="lastName" className="field-input" type="text"
+                placeholder="García" autoComplete="family-name" required
+                value={lastName} onChange={e => setLastName(e.target.value)} />
             </div>
           </div>
 
           <div className="field-group">
-            <label className="field-label" htmlFor="reg-email">
-              Correo electrónico
-            </label>
-            <input
-              id="reg-email"
-              className="field-input"
-              type="email"
-              placeholder="tu@universidad.edu.co"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <label className="field-label" htmlFor="reg-email">Correo electrónico</label>
+            <input id="reg-email" className="field-input" type="email"
+              placeholder="tu@soyudemedellin.edu.co" autoComplete="email" required
+              value={email} onChange={e => setEmail(e.target.value)} />
           </div>
 
           <div className="field-group">
-            <label className="field-label" htmlFor="program">
-              Carrera / Programa
-            </label>
-            <input
-              id="program"
-              className="field-input"
-              type="text"
+            <label className="field-label" htmlFor="program">Carrera / Programa</label>
+            <input id="program" className="field-input" type="text"
               placeholder="Ej: Ingeniería de Sistemas"
-              value={program}
-              onChange={(e) => setProgram(e.target.value)}
-            />
+              value={program} onChange={e => setProgram(e.target.value)} />
           </div>
 
           <div className="field-group">
-            <label className="field-label" htmlFor="reg-password">
-              Contraseña
-            </label>
+            <label className="field-label" htmlFor="reg-password">Contraseña</label>
             <div className="password-wrap">
-              <input
-                id="reg-password"
-                className="field-input"
+              <input id="reg-password" className="field-input"
                 type={showPass ? "text" : "password"}
-                placeholder="Mínimo 8 caracteres"
-                autoComplete="new-password"
-                required
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="password-eye"
-                onClick={() => setShowPass(v => !v)}
-                tabIndex={-1}
-              >
+                placeholder="Mínimo 8 caracteres" autoComplete="new-password"
+                required minLength={8}
+                value={password} onChange={e => setPassword(e.target.value)} />
+              <button type="button" className="password-eye"
+                onClick={() => setShowPass(v => !v)} tabIndex={-1}>
                 {showPass ? <EyeOffIcon /> : <EyeIcon />}
               </button>
             </div>
           </div>
 
           <div className="field-group">
-            <label className="field-label" htmlFor="confirm-password">
-              Confirmar contraseña
-            </label>
+            <label className="field-label" htmlFor="confirm-password">Confirmar contraseña</label>
             <div className="password-wrap">
-              <input
-                id="confirm-password"
-                className="field-input"
+              <input id="confirm-password" className="field-input"
                 type={showConfirm ? "text" : "password"}
-                placeholder="Confirma tu contraseña"
-                autoComplete="new-password"
-                required
-                value={confirmPass}
-                onChange={(e) => setConfirmPass(e.target.value)}
-              />
-              <button
-                type="button"
-                className="password-eye"
-                onClick={() => setShowConfirm(v => !v)}
-                tabIndex={-1}
-              >
+                placeholder="Confirma tu contraseña" autoComplete="new-password" required
+                value={confirmPass} onChange={e => setConfirmPass(e.target.value)} />
+              <button type="button" className="password-eye"
+                onClick={() => setShowConfirm(v => !v)} tabIndex={-1}>
                 {showConfirm ? <EyeOffIcon /> : <EyeIcon />}
               </button>
             </div>
