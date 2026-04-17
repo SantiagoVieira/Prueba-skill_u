@@ -237,9 +237,10 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 60px;
+  padding: 60px 16px 24px;
   z-index: 50;
   animation: fadeIn 0.15s ease;
+  overflow-y: auto;
 }
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -251,8 +252,14 @@ body {
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 520px;
+  max-height: calc(100vh - 84px);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   animation: slideUp 0.2s ease;
+  /* para que no se encoja si el overlay scrollea */
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 @keyframes slideUp {
   from { transform: translateY(12px); opacity: 0; }
@@ -265,6 +272,7 @@ body {
   justify-content: space-between;
   padding: 18px 22px;
   border-bottom: 1px solid var(--gray-200);
+  flex-shrink: 0;
 }
 .modal-title { font-size: 14px; font-weight: 500; }
 .modal-close-btn {
@@ -282,6 +290,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .modal-footer {
@@ -290,6 +301,7 @@ body {
   gap: 8px;
   padding: 14px 22px;
   border-top: 1px solid var(--gray-200);
+  flex-shrink: 0;
 }
 .modal-btn-cancel {
   height: 36px; padding: 0 16px;

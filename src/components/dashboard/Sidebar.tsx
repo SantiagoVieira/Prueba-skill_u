@@ -32,6 +32,17 @@ const NAV: NavGroup[] = [
         ),
       },
       {
+        label: "Mis compras",
+        href:  "/mis-compras",
+        icon: (
+          <svg viewBox="0 0 24 24">
+            <circle cx="9"  cy="21" r="1" />
+            <circle cx="20" cy="21" r="1" />
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+          </svg>
+        ),
+      },
+      {
         label:       "Mis publicaciones",
         href:        "/mis-publicaciones",
         sellerOnly:  true,
@@ -39,6 +50,17 @@ const NAV: NavGroup[] = [
           <svg viewBox="0 0 24 24">
             <circle cx="12" cy="8" r="4" />
             <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+          </svg>
+        ),
+      },
+      {
+        label:       "Mis ventas",
+        href:        "/mis-ventas",
+        sellerOnly:  true,
+        icon: (
+          <svg viewBox="0 0 24 24">
+            <line x1="12" y1="1"  x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
           </svg>
         ),
       },
@@ -76,11 +98,9 @@ export function Sidebar() {
       <div className="sidebar-logo-area">
         <Link href="/materiales" className="sidebar-logo" style={{ textDecoration: "none" }}>
           <div className="sidebar-logo-icon">
-            <svg
-              width="16" height="16" viewBox="0 0 24 24"
-              fill="none" stroke="white"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            >
+            <svg width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="white" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2L2 7l10 5 10-5-10-5z" />
               <path d="M2 17l10 5 10-5" />
               <path d="M2 12l10 5 10-5" />
@@ -91,12 +111,12 @@ export function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        {NAV.map((group) => (
+        {NAV.map(group => (
           <div key={group.section}>
             <p className="nav-section-label">{group.section}</p>
             {group.items
               .filter(item => !item.sellerOnly || isSeller)
-              .map((item) =>
+              .map(item =>
                 item.isModal ? (
                   <button
                     key={item.label}
