@@ -75,7 +75,7 @@ export default function MaterialesPage() {
 
   function showToast(msg: string) {
     setToast(msg);
-    setTimeout(() => setToast(""), 3200);
+    setTimeout(() => setToast(""), 4000);
   }
 
   const filtered = useMemo(() => {
@@ -107,7 +107,6 @@ export default function MaterialesPage() {
             </>
           )}
 
-          {/* Botón carrito */}
           <button
             onClick={() => setShowCart(true)}
             style={{
@@ -180,7 +179,7 @@ export default function MaterialesPage() {
           }}
           onGotFree={() => {
             setSelectedMat(null);
-            showToast("¡Material obtenido!");
+            showToast("¡Material obtenido! Puedes calificarlo desde Mis compras ⭐");
             loadPurchases();
           }}
           onBuyNow={() => {
@@ -235,7 +234,7 @@ export default function MaterialesPage() {
           onClose={() => setShowCheckout(false)}
           onPaid={() => {
             setShowCheckout(false);
-            showToast("🎉 ¡Compra exitosa! Ya puedes descargar tus materiales.");
+            showToast("🎉 ¡Compra exitosa! Califica al vendedor desde Mis compras ⭐");
             loadPurchases();
           }}
         />

@@ -16,7 +16,7 @@ export function ReviewList({ reputation, reviews }: Props) {
   }
 
   const bars = [5, 4, 3, 2, 1] as const;
-  const starKeys = ['one', 'two', 'three', 'four', 'five'];
+  const starKeys = ['five', 'four', 'three', 'two', 'one'];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -71,27 +71,45 @@ export function ReviewList({ reputation, reviews }: Props) {
 
       {/* Reseñas individuales */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {reviews.map((review) => (
-          <div key={review.id} style={{
-            background: 'var(--white)', border: '1px solid var(--gray-200)',
-            borderRadius: 10, padding: '12px 14px',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gray-900)' }}>
-                {review.reviewer ? `${review.reviewer.first_name} ${review.reviewer.last_name}` : 'Usuario anónimo'}
-              </span>
-              <span style={{ fontSize: 11, color: 'var(--gray-400)' }}>
-                {new Date(review.created_at).toLocaleDateString('es-CO')}
-              </span>
+        {reviews.map((review) => {
+          const displayName = review.is_anonymous
+            ? 'Usuario anónimo'
+            : review.reviewer
+              ? `${review.reviewer.first_name} ${review.reviewer.last_name}`
+              : 'Usuario anónimo';
+
+          return (
+            <div key={review.id} style={{
+              background: 'var(--white)', border: '1px solid var(--gray-200)',
+              borderRadius: 10, padding: '12px 14px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gray-900)' }}>
+                    {displayName}
+                  </span>
+                  {review.is_anonymous && (
+                    <span style={{
+                      fontSize: 10, background: 'var(--gray-100)', color: 'var(--gray-500)',
+                      borderRadius: 4, padding: '1px 6px', fontWeight: 500,
+                    }}>
+                      anónimo
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: 11, color: 'var(--gray-400)' }}>
+                  {new Date(review.created_at).toLocaleDateString('es-CO')}
+                </span>
+              </div>
+              <StarRating value={review.rating} readonly size="sm" />
+              {review.comment && (
+                <p style={{ fontSize: 13, color: 'var(--gray-600)', margin: '6px 0 0' }}>
+                  {review.comment}
+                </p>
+              )}
             </div>
-            <StarRating value={review.rating} readonly size="sm" />
-            {review.comment && (
-              <p style={{ fontSize: 13, color: 'var(--gray-600)', margin: '6px 0 0' }}>
-                {review.comment}
-              </p>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

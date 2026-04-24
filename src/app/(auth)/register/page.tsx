@@ -9,17 +9,18 @@ import { supabase } from "@/lib/supabase";
 export default function RegisterPage() {
   const router = useRouter();
 
-  const [firstName,   setFirstName]   = useState("");
-  const [lastName,    setLastName]    = useState("");
-  const [email,       setEmail]       = useState("");
-  const [program,     setProgram]     = useState("");
-  const [password,    setPassword]    = useState("");
-  const [confirmPass, setConfirmPass] = useState("");
-  const [showPass,    setShowPass]    = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [error,       setError]       = useState("");
-  const [success,     setSuccess]     = useState(false);
-  const [loading,     setLoading]     = useState(false);
+  const [firstName,       setFirstName]       = useState("");
+  const [lastName,        setLastName]        = useState("");
+  const [email,           setEmail]           = useState("");
+  const [program,         setProgram]         = useState("");
+  const [password,        setPassword]        = useState("");
+  const [confirmPass,     setConfirmPass]     = useState("");
+  const [showPass,        setShowPass]        = useState(false);
+  const [showConfirm,     setShowConfirm]     = useState(false);
+  const [dataTreatment,   setDataTreatment]   = useState(false);
+  const [error,           setError]           = useState("");
+  const [success,         setSuccess]         = useState(false);
+  const [loading,         setLoading]         = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,13 +38,23 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!dataTreatment) {
+      setError("Debes aceptar la política de tratamiento de datos para continuar.");
+      return;
+    }
+
     setLoading(true);
 
     const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { first_name: firstName, last_name: lastName, program },
+        data: {
+          first_name:              firstName,
+          last_name:               lastName,
+          program,
+          data_treatment_accepted: true,
+        },
       },
     });
 
@@ -53,7 +64,8 @@ export default function RegisterPage() {
       return;
     }
 
-    // Mostrar mensaje de éxito y redirigir después de 2.5s
+    // También actualizar el campo en profiles si el trigger ya lo creó
+    // (el trigger de Supabase crea el perfil al registrarse)
     setSuccess(true);
     setTimeout(() => router.push("/login?registered=1"), 2500);
   }
@@ -93,10 +105,7 @@ export default function RegisterPage() {
               Tu cuenta fue creada exitosamente.<br />
               Te redirigimos al inicio de sesión…
             </p>
-            <div style={{
-              height: 4, borderRadius: 2,
-              background: "var(--gray-200)", overflow: "hidden",
-            }}>
+            <div style={{ height: 4, borderRadius: 2, background: "var(--gray-200)", overflow: "hidden" }}>
               <div style={{
                 height: "100%", background: "var(--orange)",
                 borderRadius: 2,
@@ -115,8 +124,8 @@ export default function RegisterPage() {
         headline={<>Únete a la<br />comunidad<br /><em>estudiantil.</em></>}
         stats={[
           { value: "Gratis", label: "Siempre" },
-          { value: "2 min", label: "Registro" },
-          { value: "100%", label: "Estudiantes" },
+          { value: "2 min",  label: "Registro" },
+          { value: "100%",   label: "Estudiantes" },
         ]}
       />
 
@@ -183,16 +192,75 @@ export default function RegisterPage() {
             </div>
           </div>
 
+          {/* ── Checkbox tratamiento de datos ── */}
+          <div
+            onClick={() => setDataTreatment(v => !v)}
+            style={{
+              display: "flex", alignItems: "flex-start", gap: 10,
+              padding: "12px 14px",
+              background: dataTreatment ? "#fff3e8" : "var(--gray-50)",
+              border: `1.5px solid ${dataTreatment ? "var(--orange)" : "var(--gray-200)"}`,
+              borderRadius: 8, cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+          >
+            {/* Checkbox visual */}
+            <div style={{
+              width: 18, height: 18, borderRadius: 4, flexShrink: 0, marginTop: 1,
+              border: `2px solid ${dataTreatment ? "var(--orange)" : "var(--gray-300)"}`,
+              background: dataTreatment ? "var(--orange)" : "transparent",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.15s",
+            }}>
+              {dataTreatment && (
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              )}
+            </div>
+
+            {/* Texto */}
+            <p style={{
+              fontSize: 12, color: "var(--gray-700)", margin: 0, lineHeight: 1.6,
+            }}
+              onClick={e => e.stopPropagation()}
+            >
+              He leído y acepto la{" "}
+              <Link
+                href="/tratamiento-datos"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: "var(--orange)", fontWeight: 600,
+                  textDecoration: "underline",
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                Política de Tratamiento de Datos Personales
+              </Link>
+              {" "}de Skill_u, conforme a la Ley 1581 de 2012.{" "}
+              <span style={{ color: "#ef4444", fontWeight: 600 }}>*</span>
+            </p>
+          </div>
+
           {error && <p className="auth-error">{error}</p>}
 
-          <button type="submit" className="btn-primary" disabled={loading}>
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={loading || !dataTreatment}
+            style={{
+              opacity: !dataTreatment ? 0.5 : 1,
+              cursor: !dataTreatment ? "not-allowed" : "pointer",
+            }}
+          >
             {loading ? "Creando cuenta…" : "Crear mi cuenta"}
           </button>
 
           <p className="auth-terms">
-            Al registrarte aceptas nuestros{" "}
-            <Link href="#">Términos de uso</Link> y{" "}
-            <Link href="#">Política de privacidad</Link>
+            Al registrarte también aceptas nuestros{" "}
+            <Link href="#">Términos de uso</Link>
           </p>
         </form>
 

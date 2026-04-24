@@ -4,12 +4,14 @@ export interface SellerReview {
   reviewer_id: string;
   rating: 1 | 2 | 3 | 4 | 5;
   comment?: string;
+  is_anonymous: boolean;
   created_at: string;
   reviewer?: {
     first_name: string;
     last_name: string;
   };
 }
+
 export interface SellerReputation {
   seller_id: string;
   total_reviews: number;

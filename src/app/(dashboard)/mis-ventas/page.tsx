@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase }  from "@/lib/supabase";
 import { useUser }   from "@/lib/UserContext";
-import { ConfigModal } from "@/components/dashboard/ConfigModal";
-import { Toast }       from "@/components/ui/Toast";
+import { ConfigModal }        from "@/components/dashboard/ConfigModal";
+import { Toast }              from "@/components/ui/Toast";
+import { MyReputationModal } from "@/components/reputation/Myreputationmodal";
+
 
 type Sale = {
   order_id:       string;
@@ -20,10 +22,11 @@ export default function MisVentasPage() {
   const router = useRouter();
   const { profile, signOut, loading: profileLoading } = useUser();
 
-  const [sales,      setSales]      = useState<Sale[]>([]);
-  const [loading,    setLoading]    = useState(true);
-  const [showConfig, setShowConfig] = useState(false);
-  const [toast,      setToast]      = useState("");
+  const [sales,           setSales]           = useState<Sale[]>([]);
+  const [loading,         setLoading]         = useState(true);
+  const [showConfig,      setShowConfig]      = useState(false);
+  const [showReputation,  setShowReputation]  = useState(false);
+  const [toast,           setToast]           = useState("");
 
   useEffect(() => {
     const handler = () => setShowConfig(true);
@@ -48,8 +51,8 @@ export default function MisVentasPage() {
     setLoading(false);
   }
 
-  const totalIngresos  = sales.reduce((s, v) => s + (v.price ?? 0), 0);
-  const materialesMap  = sales.reduce((acc, v) => {
+  const totalIngresos = sales.reduce((s, v) => s + (v.price ?? 0), 0);
+  const materialesMap = sales.reduce((acc, v) => {
     acc[v.material_title] = (acc[v.material_title] ?? 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -61,6 +64,27 @@ export default function MisVentasPage() {
       <header className="topbar">
         <span className="topbar-title">Mis ventas</span>
         <div className="topbar-actions">
+          {/* Botón mi reputación */}
+          <button
+            onClick={() => setShowReputation(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              height: 36, padding: "0 14px",
+              background: "#fff8e1", color: "#92400e",
+              border: "1px solid #f59e0b",
+              borderRadius: "var(--radius-md)",
+              fontFamily: "DM Sans, sans-serif",
+              fontSize: 12, fontWeight: 600,
+              cursor: "pointer", transition: "background 0.15s",
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = "#fef3c7"}
+            onMouseLeave={e => e.currentTarget.style.background = "#fff8e1"}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            Mi reputación
+          </button>
           <button className="btn-signout" onClick={signOut}>Salir</button>
         </div>
       </header>
@@ -70,10 +94,10 @@ export default function MisVentasPage() {
         {/* Stats */}
         <div className="stats-grid" style={{ marginBottom: 24 }}>
           {[
-            { label: "Total ventas",   value: sales.length,                              sub: "transacciones"  },
-            { label: "Ingresos",       value: `$${totalIngresos.toLocaleString("es-CO")}`, sub: "COP generados" },
-            { label: "Más vendido",    value: masVendido,                                sub: "material top"   },
-            { label: "Compradores",    value: new Set(sales.map(s => s.buyer_name)).size, sub: "únicos"         },
+            { label: "Total ventas",   value: sales.length,                                sub: "transacciones"  },
+            { label: "Ingresos",       value: `$${totalIngresos.toLocaleString("es-CO")}`, sub: "COP generados"  },
+            { label: "Más vendido",    value: masVendido,                                  sub: "material top"   },
+            { label: "Compradores",    value: new Set(sales.map(s => s.buyer_name)).size,   sub: "únicos"         },
           ].map(c => (
             <div className="stat-card" key={c.label}>
               <div className="stat-card-label">{c.label}</div>
@@ -113,13 +137,20 @@ export default function MisVentasPage() {
         </div>
       </div>
 
+      {/* Modal mi reputación */}
+      {showReputation && profile && (
+        <MyReputationModal
+          sellerId={profile.id}
+          onClose={() => setShowReputation(false)}
+        />
+      )}
+
       {showConfig && <ConfigModal onClose={() => setShowConfig(false)} />}
       {toast      && <Toast message={toast} />}
     </>
   );
 }
 
-// ── Fila de venta ─────────────────────────────────────────
 function SaleRow({ sale: s }: { sale: Sale }) {
   return (
     <div style={{
@@ -127,7 +158,6 @@ function SaleRow({ sale: s }: { sale: Sale }) {
       background: "var(--white)", border: "1px solid var(--gray-200)",
       borderRadius: 10, padding: "12px 16px",
     }}>
-      {/* Icono */}
       <div style={{
         width: 40, height: 40, borderRadius: 8, flexShrink: 0,
         background: "#f0fdf4",
@@ -141,7 +171,6 @@ function SaleRow({ sale: s }: { sale: Sale }) {
         </svg>
       </div>
 
-      {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{
           fontSize: 13, fontWeight: 600, color: "var(--gray-900)", margin: 0,
@@ -158,11 +187,7 @@ function SaleRow({ sale: s }: { sale: Sale }) {
         </p>
       </div>
 
-      {/* Monto */}
-      <span style={{
-        fontSize: 14, fontWeight: 700,
-        color: "#16a34a", whiteSpace: "nowrap",
-      }}>
+      <span style={{ fontSize: 14, fontWeight: 700, color: "#16a34a", whiteSpace: "nowrap" }}>
         +${s.price.toLocaleString("es-CO")} COP
       </span>
     </div>

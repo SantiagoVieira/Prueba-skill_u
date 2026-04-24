@@ -3,19 +3,20 @@ import { useState } from 'react';
 import { StarRating } from './StarRating';
 
 interface Props {
-  onSubmit: (rating: number, comment?: string) => Promise<boolean>;
+  onSubmit: (rating: number, comment?: string, isAnonymous?: boolean) => Promise<boolean>;
   submitting: boolean;
   error: string | null;
 }
 
 export function ReviewForm({ onSubmit, submitting, error }: Props) {
-  const [rating, setRating]   = useState(0);
-  const [comment, setComment] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [rating, setRating]         = useState(0);
+  const [comment, setComment]       = useState('');
+  const [isAnonymous, setAnonymous] = useState(false);
+  const [success, setSuccess]       = useState(false);
 
   const handleSubmit = async () => {
     if (!rating) return;
-    const ok = await onSubmit(rating, comment || undefined);
+    const ok = await onSubmit(rating, comment || undefined, isAnonymous);
     if (ok) setSuccess(true);
   };
 
@@ -56,6 +57,40 @@ export function ReviewForm({ onSubmit, submitting, error }: Props) {
           fontFamily: 'inherit', boxSizing: 'border-box',
         }}
       />
+
+      {/* Checkbox anónimo */}
+      <label style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        cursor: 'pointer', fontSize: 13, color: 'var(--gray-600)',
+        userSelect: 'none',
+      }}>
+        <div
+          onClick={() => setAnonymous(v => !v)}
+          style={{
+            width: 18, height: 18, borderRadius: 4, flexShrink: 0,
+            border: `2px solid ${isAnonymous ? 'var(--orange)' : 'var(--gray-300)'}`,
+            background: isAnonymous ? 'var(--orange)' : 'transparent',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.15s', cursor: 'pointer',
+          }}
+        >
+          {isAnonymous && (
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+              stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          )}
+        </div>
+        <span onClick={() => setAnonymous(v => !v)}>
+          Publicar como <strong>anónimo</strong>
+        </span>
+        <span style={{
+          fontSize: 11, color: 'var(--gray-400)',
+          background: 'var(--gray-100)', borderRadius: 4, padding: '1px 6px',
+        }}>
+          {isAnonymous ? 'Tu nombre no será visible' : 'Tu nombre será visible'}
+        </span>
+      </label>
 
       {error && (
         <p style={{ fontSize: 12, color: '#dc2626', margin: 0 }}>{error}</p>
